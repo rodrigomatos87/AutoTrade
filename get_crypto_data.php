@@ -19,8 +19,6 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
     $days_needed = ceil($total_minutes_needed / (24 * 60));
     $api_intervals = array();
 
-    echo " dias:  " . $days_needed . "<br>";
-
     for ($i = $days_needed; $i >= 1; $i--) {
         $start_datetime = new DateTime('now', new DateTimeZone('UTC'));
         $start_datetime->modify('-' . $i . ' days');
@@ -30,13 +28,14 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
         $end_datetime->modify('-' . ($i - 1) . ' days');
         $end_timestamp = $end_datetime->getTimestamp();
 
+        // Subtrai 240 segundos (4 minutos) do from_timestamp
+        $start_timestamp -= 240;
+
         $api_intervals[] = array(
             'from' => $start_timestamp,
             'to' => $end_timestamp
         );
     }
-
-    echo "<pre>"; print_r($api_intervals); echo "</data>";
 
     $historical_data = array('prices' => array(), 'market_caps' => array(), 'total_volumes' => array());
 
@@ -45,19 +44,17 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
         $response = file_get_contents($url);
 
         if ($response === false) {
-            echo "entrou<br>";
             sleep(1); // Adicionar atraso de 1 segundo entre as solicitações
             $response = file_get_contents($url);
         }
 
-        $data = json_decode($response, true);
+        $response_data = json_decode($response, true);
+        echo "retornou " . count($response_data['prices']) . " valores no loop<br>";
 
-        echo "<pre>"; print_r($data); echo "</data>";
-
-        if (isset($data['prices'], $data['market_caps'], $data['total_volumes'])) {
-            $historical_data['prices'] = array_merge($historical_data['prices'], $data['prices']);
-            $historical_data['market_caps'] = array_merge($historical_data['market_caps'], $data['market_caps']);
-            $historical_data['total_volumes'] = array_merge($historical_data['total_volumes'], $data['total_volumes']);
+        if (isset($response_data['prices']) && isset($response_data['market_caps']) && isset($response_data['total_volumes'])) {
+            $historical_data['prices'] = array_merge($historical_data['prices'], $response_data['prices']);
+            $historical_data['market_caps'] = array_merge($historical_data['market_caps'], $response_data['market_caps']);
+            $historical_data['total_volumes'] = array_merge($historical_data['total_volumes'], $response_data['total_volumes']);
         }
     }
 
@@ -68,6 +65,10 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
     if ($filter_index < 1) {
         $filter_index = 1;
     }
+
+    echo "soma dos loops: " . count($historical_data['prices']) . "<br>";
+
+    echo "<pre>"; print_r($historical_data); echo "</data>";
 
     for ($i = 0; $i < count($historical_data['prices']); $i++) {
         if ($i % $filter_index == 0) {
