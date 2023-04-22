@@ -15,13 +15,11 @@ if (file_exists($filename)) {
     // Lê os dados históricos do arquivo
     $json = file_get_contents($filename);
     $data = json_decode($json, true);
-    echo "entrou 1<br>";
 } else {
     // Obtenha os dados da coingecko
     $data = get_crypto_historical_data($coin_id, $interval, $count);
     // Salva os dados históricos em um arquivo
     file_put_contents($filename, json_encode($data));
-    echo "entrou 2<br>";
 }
 
 function save_opportunity_to_file($opportunity, $filename) {
@@ -30,7 +28,10 @@ function save_opportunity_to_file($opportunity, $filename) {
     fclose($file);
 }
 
-echo "count: " . count($data['prices']);
+echo "prices: " . count($data['prices']) . "<br>";
+echo "market_caps: " . count($data['market_caps']) . "<br>";
+echo "total_volumes: " . count($data['total_volumes']) . "<br>";
+
 exit;
 
 // Calcule os indicadores

@@ -14,6 +14,75 @@ function load_data_from_file($filename) {
 }
 
 function get_crypto_historical_data($coin_id, $interval, $count) {
+    $interval_minutes = intval($interval);
+    $interval_seconds = $interval_minutes * 60;
+    $days_needed = ceil($count * $interval_seconds / (24 * 60 * 60));
+    $api_intervals = array();
+
+    for ($i = $days_needed; $i >= 1; $i--) {
+        $start_datetime = new DateTime('now', new DateTimeZone('UTC'));
+        $start_datetime->modify('-' . $i . ' days');
+        $start_timestamp = $start_datetime->getTimestamp();
+
+        $end_datetime = new DateTime('now', new DateTimeZone('UTC'));
+        $end_datetime->modify('-' . ($i - 1) . ' days');
+        $end_timestamp = $end_datetime->getTimestamp();
+
+        $api_intervals[] = array(
+            'from' => $start_timestamp,
+            'to' => $end_timestamp
+        );
+    }
+
+    $historical_data = array('prices' => array(), 'market_caps' => array(), 'total_volumes' => array());
+
+    foreach ($api_intervals as $interval) {
+        $url = "https://api.coingecko.com/api/v3/coins/{$coin_id}/market_chart/range?vs_currency=usd&from={$interval['from']}&to={$interval['to']}";
+        $response = file_get_contents($url);
+
+        if ($response === false) {
+            echo "entrou<br>";
+            sleep(1); // Adicionar atraso de 1 segundo entre as solicitações
+            $response = file_get_contents($url);
+        }
+
+        $data = json_decode($response, true);
+
+        echo "<pre>"; print_r($data); echo "</data>";
+
+        if (isset($data['prices'], $data['market_caps'], $data['total_volumes'])) {
+            $historical_data['prices'] = array_merge($historical_data['prices'], $data['prices']);
+            $historical_data['market_caps'] = array_merge($historical_data['market_caps'], $data['market_caps']);
+            $historical_data['total_volumes'] = array_merge($historical_data['total_volumes'], $data['total_volumes']);
+        }
+    }
+
+    $filtered_data = array('prices' => array(), 'market_caps' => array(), 'total_volumes' => array());
+    $data_count = 0;
+    $filter_index = floor($interval_minutes / 5);
+
+    for ($i = 0; $i < count($historical_data['prices']); $i++) {
+        if ($i % $filter_index == 0) {
+            $filtered_data['prices'][] = $historical_data['prices'][$i];
+            $filtered_data['market_caps'][] = $historical_data['market_caps'][$i];
+            $filtered_data['total_volumes'][] = $historical_data['total_volumes'][$i];
+            $data_count++;
+
+            if ($data_count >= $count) {
+                break;
+            }
+        }
+    }
+
+    return $filtered_data;
+}
+
+
+
+
+
+/*
+function get_crypto_historical_data($coin_id, $interval, $count) {
     // URL base da CoinGecko API gratuita
     $base_url = "https://api.coingecko.com/api/v3/";
 
@@ -60,5 +129,5 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
     // Retorna o resultado
     return $historical_data;
 }
-
+*/
 ?>
