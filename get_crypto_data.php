@@ -15,12 +15,11 @@ function load_data_from_file($filename) {
 
 function get_crypto_historical_data($coin_id, $interval, $count) {
     $interval_minutes = intval($interval);
-    $interval_seconds = $interval_minutes * 60;
-    $days_needed = ceil($count * $interval_seconds / (24 * 60 * 60 * 5)); // Multiplica por 5 para considerar o intervalo de 5 minutos da API
-    $days_neededbkp = ceil($count * $interval_seconds / (24 * 60 * 60));
+    $total_minutes_needed = $count * $interval_minutes;
+    $days_needed = ceil($total_minutes_needed / (24 * 60));
     $api_intervals = array();
 
-    echo $days_needed . " || " . $days_neededbkp . "<br>";
+    echo " dias:  " . $days_needed . "<br>";
 
     for ($i = $days_needed; $i >= 1; $i--) {
         $start_datetime = new DateTime('now', new DateTimeZone('UTC'));
@@ -36,6 +35,8 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
             'to' => $end_timestamp
         );
     }
+
+    echo "<pre>"; print_r($api_intervals); echo "</data>";
 
     $historical_data = array('prices' => array(), 'market_caps' => array(), 'total_volumes' => array());
 
