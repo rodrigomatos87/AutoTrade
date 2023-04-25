@@ -16,21 +16,30 @@ function load_data_from_file($filename) {
 function get_crypto_historical_data($coin_id, $interval, $count) {
     $interval_minutes = intval($interval);
     $total_minutes_needed = $count * $interval_minutes;
-    $days_needed = ceil($total_minutes_needed / (24 * 60));
+
+    // Determinar o número de pedaços de 12 horas necessários para coletar os dados
+    $total_half_days_needed = ceil($total_minutes_needed / (12 * 60));
+
+    echo "total: " . $total_half_days_needed . "<br>";
+
+    //$interval_minutes = intval($interval);
+    //$total_minutes_needed = $count * $interval_minutes;
+    //$days_needed = ceil($total_minutes_needed / (24 * 60));
     $api_intervals = array();
 
-    for ($i = $days_needed; $i >= 1; $i--) {
+    for ($i = $total_half_days_needed; $i >= 1; $i--) {
+        // Determinar a data e hora de início e fim para o pedaço atual de 12 horas
         $start_datetime = new DateTime('now', new DateTimeZone('UTC'));
-        $start_datetime->modify('-' . $i . ' days');
+        $start_datetime->modify('-' . ($i * 12) . ' hours');
         $start_timestamp = $start_datetime->getTimestamp();
-
+    
         $end_datetime = new DateTime('now', new DateTimeZone('UTC'));
-        $end_datetime->modify('-' . ($i - 1) . ' days');
+        $end_datetime->modify('-' . (($i - 1) * 12) . ' hours');
         $end_timestamp = $end_datetime->getTimestamp();
-
-        // Subtrai 240 segundos (4 minutos) do from_timestamp
+    
+        // Subtrair 240 segundos (4 minutos) do from_timestamp
         $start_timestamp -= 240;
-
+    
         $api_intervals[] = array(
             'from' => $start_timestamp,
             'to' => $end_timestamp
@@ -44,12 +53,11 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
         $response = file_get_contents($url);
 
         if ($response === false) {
-            sleep(1); // Adicionar atraso de 1 segundo entre as solicitações
+            sleep(5); // Adicionar atraso de 1 segundo entre as solicitações
             $response = file_get_contents($url);
         }
 
         $response_data = json_decode($response, true);
-        echo "retornou " . count($response_data['prices']) . " valores no loop<br>";
 
         if (isset($response_data['prices']) && isset($response_data['market_caps']) && isset($response_data['total_volumes'])) {
             $historical_data['prices'] = array_merge($historical_data['prices'], $response_data['prices']);
@@ -66,9 +74,8 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
         $filter_index = 1;
     }
 
-    echo "soma dos loops: " . count($historical_data['prices']) . "<br>";
-
-    echo "<pre>"; print_r($historical_data); echo "</data>";
+    echo "historical_data: " . count($historical_data['prices']) . "<br>";
+    //echo "<pre>"; print_r($historical_data); echo "</data>";
 
     for ($i = 0; $i < count($historical_data['prices']); $i++) {
         if ($i % $filter_index == 0) {
@@ -82,6 +89,8 @@ function get_crypto_historical_data($coin_id, $interval, $count) {
             }
         }
     }
+
+    echo "filtered_data: " . count($filtered_data['prices']) . "<br>";
 
     return $filtered_data;
 }
