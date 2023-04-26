@@ -1,0 +1,1 @@
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-26 01:57:49 | Price: 28269.25000000

@@ -75,17 +75,15 @@ $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_
 //print_r($rsi);
 //echo '</pre>';
 
-exit;
-
 $last_index = count($data) - 1;
 
-for ($i = max($sma_long_period, $ema_short_period, $ema_long_period, $macd_short_period, $macd_long_period, $bb_period, $rsi_period, $stoch_k_period, $stoch_d_period); $i < count($data); $i++) {
+for ($i = max(200, 14); $i < $last_index; $i++) {
     $is_up_trend = $ema_50[$i] > $ema_200[$i];
     $is_down_trend = $ema_50[$i] < $ema_200[$i];
     $rsi_above_50 = $rsi[$i] > 50;
     $rsi_below_50 = $rsi[$i] < 50;
-    $macd_cross_above_signal = $macd[$i]['macd'] > $macd[$i]['signal'] && $macd[$i - 1]['macd'] <= $macd[$i - 1]['signal'];
-    $macd_cross_below_signal = $macd[$i]['macd'] < $macd[$i]['signal'] && $macd[$i - 1]['macd'] >= $macd[$i - 1]['signal'];
+    $macd_cross_above_signal = $macd['macd'][$i] > $macd['signal'][$i] && $macd['macd'][$i - 1] <= $macd['signal'][$i - 1];
+    $macd_cross_below_signal = $macd['macd'][$i] < $macd['signal'][$i] && $macd['macd'][$i - 1] >= $macd['signal'][$i - 1];
     $price_near_lower_band = $data[$i][4] <= $bollinger_bands[$i]['lower'];
     $price_near_upper_band = $data[$i][4] >= $bollinger_bands[$i]['upper'];
     $stoch_k_cross_above_d = $stochastic[$i]['k'] > $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] <= $stochastic[$i - 1]['d'];
@@ -93,16 +91,18 @@ for ($i = max($sma_long_period, $ema_short_period, $ema_long_period, $macd_short
 
     if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
         // Sinal de compra (CALL)
-        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i]);
+        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i][4]);
     } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
         // Sinal de venda (PUT)
-        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i]);
+        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4]);
+    } else {
+        //echo "$symbol, $interval, \"teste\", {$data[$i][4]}<br>";
     }
 }
 
 function save_opportunity_to_file($symbol, $interval, $signal_type, $candle_data) {
     $filename = "opportunities.txt";
-    $opportunity = "Symbol: {$symbol} | Interval: {$interval} | Signal: {$signal_type} | Time: " . date("Y-m-d H:i:s", $candle_data['timestamp'] / 1000) . " | Price: {$candle_data['close']}" . PHP_EOL;
+    $opportunity = "Symbol: {$symbol} | Interval: {$interval} | Signal: {$signal_type} | Time: " . date("Y-m-d H:i:s") . " | Price: {$candle_data}" . PHP_EOL;
 
     file_put_contents($filename, $opportunity, FILE_APPEND);
 }

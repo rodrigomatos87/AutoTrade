@@ -79,7 +79,7 @@ function relative_strength_index($data, $period) {
 // Calcula a Convergência e Divergência de Médias Móveis (MACD), que é a diferença entre a EMA de curto prazo e a EMA de longo prazo
 function moving_average_convergence_divergence($data, $short_period = 12, $long_period = 26, $signal_period = 9) {
     $macd = [];
-    $signal_line = [];
+    $signal = [];
     $histogram = [];
 
     $ema_short = exponential_moving_average($data, $short_period);
@@ -97,14 +97,14 @@ function moving_average_convergence_divergence($data, $short_period = 12, $long_
     for ($i = 0; $i < count($data); $i++) {
         // Verifique se o índice existe antes de acessar
         if (isset($macd[$i]) && isset($ema_signal[$i])) {
-            $signal_line[$i] = $ema_signal[$i];
-            $histogram[$i] = $macd[$i] - $signal_line[$i];
+            $signal[$i] = $ema_signal[$i];
+            $histogram[$i] = $macd[$i] - $signal[$i];
         }
     }
 
     return [
         'macd' => $macd,
-        'signal_line' => $signal_line,
+        'signal' => $signal,
         'histogram' => $histogram,
     ];
 }
