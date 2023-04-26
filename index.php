@@ -58,37 +58,13 @@ foreach ($data as $row) {
 }
 */
 
-function save_opportunity_to_file($opportunity, $filename) {
-    $file = fopen($filename, 'a');
-    fwrite($file, $opportunity . PHP_EOL);
-    fclose($file);
-}
-
-// Execute a função MACD com os períodos desejados (por exemplo, 12, 26 e 9)
-$short_period = 12;
-$long_period = 26;
-$signal_period = 9;
-
 // Calcule os indicadores
-$sma = simple_moving_average($data, 20);
-$ema = exponential_moving_average($data, 20);
-$macd = moving_average_convergence_divergence($data, $short_period, $long_period, $signal_period);
-
-// Exiba os resultados
-//echo "MACD: " . json_encode($macd['macd']) . "<br>";
-//echo "Signal Line: " . json_encode($macd['signal_line']) . "<br>";
-//echo "Histogram: " . json_encode($macd['histogram']) . "<br>";
-
-// Calcule as Bandas de Bollinger
-$period = 20;
-$num_standard_deviations = 2;
-$bollinger_bands = bollinger_bands($data, $period, $num_standard_deviations);
-
-$k_period = 14;
-$d_period = 3;
-$stoch = stochastic_oscillator($data, $k_period, $d_period);
-
+$ema_50 = exponential_moving_average($data, 50);
+$ema_200 = exponential_moving_average($data, 200);
 $rsi = relative_strength_index($data, 14);
+$macd = moving_average_convergence_divergence($data, 12, 26, 9);    // (data, short_period, long_period, signal_period)
+$bollinger_bands = bollinger_bands($data, 20, 2);                   // (data, period, num_standard_deviations)
+$stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_period, d_period)
 
 //echo '<pre>';
 //print_r($sma);
@@ -98,5 +74,35 @@ $rsi = relative_strength_index($data, 14);
 //print_r($stoch);
 //print_r($rsi);
 //echo '</pre>';
+
+$last_index = count($data) - 1;
+
+for ($i = max(200, 14); $i < $last_index; $i++) {
+    $is_up_trend = $ema_50[$i] > $ema_200[$i];
+    $is_down_trend = $ema_50[$i] < $ema_200[$i];
+    $rsi_above_50 = $rsi[$i] > 50;
+    $rsi_below_50 = $rsi[$i] < 50;
+    $macd_cross_above_signal = $macd['macd'][$i] > $macd['signal'][$i] && $macd['macd'][$i - 1] <= $macd['signal'][$i - 1];
+    $macd_cross_below_signal = $macd['macd'][$i] < $macd['signal'][$i] && $macd['macd'][$i - 1] >= $macd['signal'][$i - 1];
+    $price_near_lower_band = $data[$i]['close'] <= $bollinger_bands['lower'][$i];
+    $price_near_upper_band = $data[$i]['close'] >= $bollinger_bands['upper'][$i];
+    $stoch_k_cross_above_d = $stochastic['k'][$i] > $stochastic['d'][$i] && $stochastic['k'][$i - 1] <= $stochastic['d'][$i - 1];
+    $stoch_k_cross_below_d = $stochastic['k'][$i] < $stochastic['d'][$i] && $stochastic['k'][$i - 1] >= $stochastic['d'][$i - 1];
+
+    if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
+        // Sinal de compra (CALL)
+        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i]);
+    } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
+        // Sinal de venda (PUT)
+        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i]);
+    }
+}
+
+function save_opportunity_to_file($symbol, $interval, $signal_type, $candle_data) {
+    $filename = "opportunities.txt";
+    $opportunity = "Symbol: {$symbol} | Interval: {$interval} | Signal: {$signal_type} | Time: " . date("Y-m-d H:i:s", $candle_data['timestamp'] / 1000) . " | Price: {$candle_data['close']}" . PHP_EOL;
+
+    file_put_contents($filename, $opportunity, FILE_APPEND);
+}
 
 ?>

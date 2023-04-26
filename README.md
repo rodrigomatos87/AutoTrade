@@ -22,3 +22,7 @@ Gestão de risco e saída de posição:
 
 * Defina stop-loss e take-profit com base na volatilidade do mercado e nos níveis de suporte e resistência.
 * Monitore o desempenho da posição e ajuste os níveis de stop-loss e take-profit conforme necessário para proteger os lucros e limitar as perdas.
+
+
+
+Os indicadores criados até o momento e disponível são: SMA, EMA, Bollinger, RSI, MACD e oscilador estocástico
