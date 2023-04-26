@@ -1,19 +1,18 @@
 <?php
 /*
 Estrutura array ohlcvs:
-
-0.  Open time
-1.  Open
-2.  High
-3.  Low
-4.  Close
-5.  Volume
-6.  Close time
-7.  Quote asset volume
-8.  Number of trades
-9.  Taker buy base asset volume
-10. Taker buy quote asset volume
-11. Ignore
+    0.  Open time
+    1.  Open
+    2.  High
+    3.  Low
+    4.  Close
+    5.  Volume
+    6.  Close time
+    7.  Quote asset volume
+    8.  Number of trades
+    9.  Taker buy base asset volume
+    10. Taker buy quote asset volume
+    11. Ignore
 */
 
 function save_data_to_file($data, $filename) {
@@ -48,7 +47,7 @@ function download_and_extract_data($symbol, $interval, $candles_count) {
     ];
 
     if (!isset($interval_mapping[$interval])) {
-        echo "Intervalo inválido.<br><br>";
+        echo "Intervalo inválido.<br>";
         return;
     }
 
@@ -83,16 +82,16 @@ function download_and_extract_data($symbol, $interval, $candles_count) {
             curl_close($ch);
 
             file_put_contents("{$data_folder}/{$zip_filename}", $data);
-            echo "Arquivo {$zip_filename} baixado com sucesso.<br><br>";
+            //echo "Arquivo {$zip_filename} baixado com sucesso.<br>";
         } else {
-            echo "Arquivo {$zip_filename} já existe. Ignorando o download.<br><br>";
+            //echo "Arquivo {$zip_filename} já existe. Ignorando o download.<br>";
         }
 
         $zip = new ZipArchive();
         if ($zip->open("{$data_folder}/{$zip_filename}") === true) {
             $zip->extractTo($data_folder);
             $zip->close();
-            echo "Arquivo {$zip_filename} extraído com sucesso.<br><br>";
+            //echo "Arquivo {$zip_filename} extraído com sucesso.<br>";
 
             if (($handle = fopen("{$data_folder}/{$csv_filename}", "r")) !== false) {
                 while (($row = fgetcsv($handle, 1000, ",")) !== false) {
@@ -103,7 +102,7 @@ function download_and_extract_data($symbol, $interval, $candles_count) {
                 unlink("{$data_folder}/{$csv_filename}");
             }
         } else {
-            echo "Não foi possível extrair o arquivo {$zip_filename}.<br><br>";
+            echo "Não foi possível extrair o arquivo {$zip_filename}.<br>";
         }
 
         $current_date = date("Y-m-d", strtotime($current_date . " +1 day"));
