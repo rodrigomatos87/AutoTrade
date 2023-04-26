@@ -77,17 +77,17 @@ $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_
 
 $last_index = count($data) - 1;
 
-for ($i = max(200, 14); $i < $last_index; $i++) {
+for ($i = max($sma_long_period, $ema_short_period, $ema_long_period, $macd_short_period, $macd_long_period, $bb_period, $rsi_period, $stoch_k_period, $stoch_d_period); $i < count($data); $i++) {
     $is_up_trend = $ema_50[$i] > $ema_200[$i];
     $is_down_trend = $ema_50[$i] < $ema_200[$i];
     $rsi_above_50 = $rsi[$i] > 50;
     $rsi_below_50 = $rsi[$i] < 50;
-    $macd_cross_above_signal = $macd['macd'][$i] > $macd['signal'][$i] && $macd['macd'][$i - 1] <= $macd['signal'][$i - 1];
-    $macd_cross_below_signal = $macd['macd'][$i] < $macd['signal'][$i] && $macd['macd'][$i - 1] >= $macd['signal'][$i - 1];
-    $price_near_lower_band = $data[$i]['close'] <= $bollinger_bands['lower'][$i];
-    $price_near_upper_band = $data[$i]['close'] >= $bollinger_bands['upper'][$i];
-    $stoch_k_cross_above_d = $stochastic['k'][$i] > $stochastic['d'][$i] && $stochastic['k'][$i - 1] <= $stochastic['d'][$i - 1];
-    $stoch_k_cross_below_d = $stochastic['k'][$i] < $stochastic['d'][$i] && $stochastic['k'][$i - 1] >= $stochastic['d'][$i - 1];
+    $macd_cross_above_signal = $macd[$i]['macd'] > $macd[$i]['signal'] && $macd[$i - 1]['macd'] <= $macd[$i - 1]['signal'];
+    $macd_cross_below_signal = $macd[$i]['macd'] < $macd[$i]['signal'] && $macd[$i - 1]['macd'] >= $macd[$i - 1]['signal'];
+    $price_near_lower_band = $data[$i][4] <= $bollinger_bands[$i]['lower'];
+    $price_near_upper_band = $data[$i][4] >= $bollinger_bands[$i]['upper'];
+    $stoch_k_cross_above_d = $stochastic[$i]['k'] > $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] <= $stochastic[$i - 1]['d'];
+    $stoch_k_cross_below_d = $stochastic[$i]['k'] < $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] >= $stochastic[$i - 1]['d'];    
 
     if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
         // Sinal de compra (CALL)
