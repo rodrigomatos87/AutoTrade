@@ -66,14 +66,7 @@ $macd = moving_average_convergence_divergence($data, 12, 26, 9);    // (data, sh
 $bollinger_bands = bollinger_bands($data, 20, 2);                   // (data, period, num_standard_deviations)
 $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_period, d_period)
 
-//echo '<pre>';
-//print_r($sma);
-//print_r($ema_50);
-//print_r($bollinger_bands);
-//print_r($macd);
-//print_r($stoch);
-//print_r($rsi);
-//echo '</pre>';
+// echo '<pre>'; print_r($bollinger_bands); echo '</pre>';
 
 $last_index = count($data) - 1;
 
@@ -95,8 +88,6 @@ for ($i = max(200, 14); $i < $last_index; $i++) {
     } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
         // Sinal de venda (PUT)
         save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4], $data[$i][6]);
-    } else {
-        //echo "$symbol, $interval, \"teste\", {$data[$i][4]}<br>";
     }
 }
 
