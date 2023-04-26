@@ -75,54 +75,28 @@ $ema = exponential_moving_average($data, 20);
 $macd = moving_average_convergence_divergence($data, $short_period, $long_period, $signal_period);
 
 // Exiba os resultados
-echo "MACD: " . json_encode($macd['macd']) . "<br>";
-echo "Signal Line: " . json_encode($macd['signal_line']) . "<br>";
-echo "Histogram: " . json_encode($macd['histogram']) . "<br>";
+//echo "MACD: " . json_encode($macd['macd']) . "<br>";
+//echo "Signal Line: " . json_encode($macd['signal_line']) . "<br>";
+//echo "Histogram: " . json_encode($macd['histogram']) . "<br>";
 
 // Calcule as Bandas de Bollinger
 $period = 20;
 $num_standard_deviations = 2;
 $bollinger_bands = bollinger_bands($data, $period, $num_standard_deviations);
 
-// Acesse as bandas superior, média e inferior
-$upper_band = $bollinger_bands['upper'];
-$middle_band = $bollinger_bands['middle'];
-$lower_band = $bollinger_bands['lower'];
+$k_period = 14;
+$d_period = 3;
+$stoch = stochastic_oscillator($data, $k_period, $d_period);
 
+$rsi = relative_strength_index($data, 14);
 
-
-//$macd = moving_average_convergence_divergence($data);
-//$stoch = stochastic_oscillator($data);
-//$rsi = relative_strength_index($data, 14);
-
-echo '<pre>';
+//echo '<pre>';
 //print_r($sma);
 //print_r($ema);
-print_r($bollinger_bands);
+//print_r($bollinger_bands);
 //print_r($macd);
 //print_r($stoch);
 //print_r($rsi);
-echo '</pre>';
+//echo '</pre>';
 
-/*
-// Verificar sinais de compra e venda
-for ($i = max(50, 200, 14, 20); $i < count($data['prices']); $i++) {
-    $price = $data['prices'][$i][1];
-
-    // Regras de entrada para compra (CALL)
-    if (isset($ema50[$i], $ema200[$i], $rsi[$i], $macd['macd'][$i], $macd['signal'][$i], $bb['lower'][$i]) && $price > $ema50[$i] && $price > $ema200[$i] && $rsi[$i] < 30 && $macd['macd'][$i] > $macd['signal'][$i] && $price <= $bb['lower'][$i]) {
-        $opportunity = "Sinal de COMPRA (CALL) na barra $i";
-        save_opportunity_to_file($opportunity, 'oportunidades.txt');
-    }
-
-    // Regras de entrada para venda (PUT)
-    if (isset($ema50[$i], $ema200[$i], $rsi[$i], $macd['macd'][$i], $macd['signal'][$i], $bb['upper'][$i]) && $price < $ema50[$i] && $price < $ema200[$i] && $rsi[$i] > 70 && $macd['macd'][$i] < $macd['signal'][$i] && $price >= $bb['upper'][$i]) {
-        $opportunity = "Sinal de VENDA (PUT) na barra $i";
-        save_opportunity_to_file($opportunity, 'oportunidades.txt');
-    }
-
-
-    // Implemente as regras de saída de acordo com sua tolerância ao risco e objetivos de lucro
-}
-*/
 ?>
