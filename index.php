@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 
 require_once 'get_crypto_data.php';
 require_once 'technical_indicators.php';
+require_once 'funcoes.php';
 
 $symbol = "BTCUSDT";
 $interval = "1m";
@@ -47,14 +48,14 @@ $all_data = array_merge($historical_data, $latest_data);
 // Retorne apenas os últimos candles_count dados
 $data = array_slice($all_data, -$candles_count);
 
+/*
 echo "historical_data: " . count($historical_data) . "<br>";
 echo "latest_data: " . count($latest_data) . "<br>";
 echo "total: " . count($data) . "<br>";
 
-/*
 foreach ($data as $row) {
     list($timestamp, $open, $high, $low, $close, $volume) = $row;
-    echo "Timestamp: {$timestamp}, Open: {$open}, High: {$high}, Low: {$low}, Close: {$close}, Volume: {$volume}<br>";
+    echo timestamp_to_readable_date($timestamp) . ", Open: {$open}, High: {$high}, Low: {$low}, Close: {$close}, Volume: {$volume}<br>";
 }
 */
 
@@ -66,11 +67,26 @@ $macd = moving_average_convergence_divergence($data, 12, 26, 9);    // (data, sh
 $bollinger_bands = bollinger_bands($data, 20, 2);                   // (data, period, num_standard_deviations)
 $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_period, d_period)
 
-// echo '<pre>'; print_r($bollinger_bands); echo '</pre>';
+// Calculando o maior valor mínimo para configurar o 'for'
+$ema_50_min_index = 50 - 1; // 49
+$ema_200_min_index = 200 - 1; // 199
+$rsi_min_index = 14 - 1; // 13
+$macd_min_index = max(12, 26, 9) - 1; // 25
+$bollinger_bands_min_index = 20 - 1; // 19
+$stochastic_min_index = 14 - 1; // 13
 
-$last_index = count($data) - 1;
+$highest_min_index = max($ema_50_min_index, $ema_200_min_index, $rsi_min_index, $macd_min_index, $bollinger_bands_min_index, $stochastic_min_index);
 
-for ($i = max(200, 14); $i < $last_index; $i++) {
+$max_size = min(
+    count($ema_50),
+    count($ema_200),
+    count($rsi),
+    count($macd['macd']),
+    count($bollinger_bands),
+    count($stochastic)
+);
+
+for ($i = $max_size - 1; $i >= $highest_min_index; $i--) {
     $is_up_trend = $ema_50[$i] > $ema_200[$i];
     $is_down_trend = $ema_50[$i] < $ema_200[$i];
     $rsi_above_50 = $rsi[$i] > 50;
@@ -84,17 +100,11 @@ for ($i = max(200, 14); $i < $last_index; $i++) {
 
     if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
         // Sinal de compra (CALL)
-        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i][4], $data[$i][6]);
+        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i][4], $data[$i][0]);
     } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
         // Sinal de venda (PUT)
-        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4], $data[$i][6]);
+        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4], $data[$i][0]);
     }
-}
-
-function save_opportunity_to_file($symbol, $interval, $signal_type, $candle_price, $candle_date) {
-    $filename = "opportunities.txt";
-    $opportunity = "Symbol: {$symbol} | Interval: {$interval} | Signal: {$signal_type} | Time: " . date("Y-m-d H:i:s", $candle_date / 1000) . " | Price: {$candle_price}" . PHP_EOL;
-    file_put_contents($filename, $opportunity, FILE_APPEND);
 }
 
 ?>
