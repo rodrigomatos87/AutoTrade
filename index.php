@@ -68,12 +68,14 @@ $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_
 
 //echo '<pre>';
 //print_r($sma);
-//print_r($ema);
+//print_r($ema_50);
 //print_r($bollinger_bands);
 //print_r($macd);
 //print_r($stoch);
 //print_r($rsi);
 //echo '</pre>';
+
+exit;
 
 $last_index = count($data) - 1;
 
@@ -87,7 +89,7 @@ for ($i = max($sma_long_period, $ema_short_period, $ema_long_period, $macd_short
     $price_near_lower_band = $data[$i][4] <= $bollinger_bands[$i]['lower'];
     $price_near_upper_band = $data[$i][4] >= $bollinger_bands[$i]['upper'];
     $stoch_k_cross_above_d = $stochastic[$i]['k'] > $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] <= $stochastic[$i - 1]['d'];
-    $stoch_k_cross_below_d = $stochastic[$i]['k'] < $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] >= $stochastic[$i - 1]['d'];    
+    $stoch_k_cross_below_d = $stochastic[$i]['k'] < $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] >= $stochastic[$i - 1]['d'];  
 
     if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
         // Sinal de compra (CALL)
