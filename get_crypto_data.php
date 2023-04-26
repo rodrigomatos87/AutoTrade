@@ -15,19 +15,6 @@ Estrutura array ohlcvs:
     11. Ignore
 */
 
-function save_data_to_file($data, $filename) {
-    file_put_contents($filename, json_encode($data));
-}
-
-function load_data_from_file($filename) {
-    if (file_exists($filename)) {
-        $content = file_get_contents($filename);
-        return json_decode($content, true);
-    }
-
-    return null;
-}
-
 // Históricos ohlcvs
 function download_and_extract_data($symbol, $interval, $candles_count) {
     // Converte o intervalo para segundos
