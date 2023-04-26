@@ -49,46 +49,12 @@ $data = array_slice($all_data, -$candles_count);
 
 echo "total: " . count($data) . "<br>";
 
+/*
 foreach ($data as $row) {
     list($timestamp, $open, $high, $low, $close, $volume) = $row;
     echo "Timestamp: {$timestamp}, Open: {$open}, High: {$high}, Low: {$low}, Close: {$close}, Volume: {$volume}<br>";
 }
-
-
-
-/*
-$historical_data = download_and_extract_data($symbol, $interval, $historical_candles_count);
-$latest_data = get_latest_data($symbol, $interval, $candles_today);
-
-// Combine os dados históricos e os mais recentes
-$all_data = array_merge($historical_data, $latest_data);
-
-// Retorne apenas os últimos candles_count dados
-$data = array_slice($all_data, -$candles_count);
-
-//$data = get_crypto_historical_data($exchange, $pair, $interval, $count);
-
-//$data = download_and_extract_data($symbol, $interval, $candles_count);
-//$data = get_latest_data($symbol, $interval, $candles_count);
-
-echo "<pre>"; print_r($data); echo "</pre>";
-
-exit;
-
-$filename = "historical_data_{$coin_id}_{$interval}.json";
-if (file_exists($filename)) {
-    // Lê os dados históricos do arquivo
-    $json = file_get_contents($filename);
-    $data = json_decode($json, true);
-} else {
-    // Obtenha os dados da coingecko
-    $data = get_crypto_historical_data($coin_id, $interval, $count);
-    // Salva os dados históricos em um arquivo
-    file_put_contents($filename, json_encode($data));
-}
 */
-
-
 
 function save_opportunity_to_file($opportunity, $filename) {
     $file = fopen($filename, 'a');
@@ -96,23 +62,34 @@ function save_opportunity_to_file($opportunity, $filename) {
     fclose($file);
 }
 
-// echo "prices: " . count($data['prices']) . "<br>";
-// echo "market_caps: " . count($data['market_caps']) . "<br>";
-// echo "total_volumes: " . count($data['total_volumes']) . "<br>";
+// Execute a função MACD com os períodos desejados (por exemplo, 12, 26 e 9)
+$short_period = 12;
+$long_period = 26;
+$signal_period = 9;
 
 // Calcule os indicadores
-$ema50 = ema($data, 50);
-$ema200 = ema($data, 200);
-$rsi = rsi($data, 14);
-$bb = bollingerBands($data, 20, 2);
-$macd = macd($data, 12, 26, 9);
+$sma = simple_moving_average($data, 20);
+$ema = exponential_moving_average($data, 20);
+$macd = moving_average_convergence_divergence($data, $short_period, $long_period, $signal_period);
+
+// Exiba os resultados
+echo "MACD: " . json_encode($macd['macd']) . "<br>";
+echo "Signal Line: " . json_encode($macd['signal_line']) . "<br>";
+echo "Histogram: " . json_encode($macd['histogram']) . "<br>";
+
+
+//$bollinger = bollinger_bands($data, 20);
+//$macd = moving_average_convergence_divergence($data);
+//$stoch = stochastic_oscillator($data);
+//$rsi = relative_strength_index($data, 14);
 
 echo '<pre>';
-print_r($ema50);
-print_r($ema200);
-print_r($rsi);
-print_r($macd);
-print_r($bb);
+print_r($sma);
+print_r($ema);
+//print_r($bollinger);
+//print_r($macd);
+//print_r($stoch);
+//print_r($rsi);
 echo '</pre>';
 
 // Verificar sinais de compra e venda

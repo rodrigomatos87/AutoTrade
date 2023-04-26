@@ -1,4 +1,20 @@
 <?php
+/*
+Estrutura array ohlcvs:
+
+0.  Open time
+1.  Open
+2.  High
+3.  Low
+4.  Close
+5.  Volume
+6.  Close time
+7.  Quote asset volume
+8.  Number of trades
+9.  Taker buy base asset volume
+10. Taker buy quote asset volume
+11. Ignore
+*/
 
 function save_data_to_file($data, $filename) {
     file_put_contents($filename, json_encode($data));
