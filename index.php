@@ -47,6 +47,8 @@ $all_data = array_merge($historical_data, $latest_data);
 // Retorne apenas os últimos candles_count dados
 $data = array_slice($all_data, -$candles_count);
 
+echo "historical_data: " . count($historical_data) . "<br>";
+echo "latest_data: " . count($latest_data) . "<br>";
 echo "total: " . count($data) . "<br>";
 
 /*
@@ -77,21 +79,32 @@ echo "MACD: " . json_encode($macd['macd']) . "<br>";
 echo "Signal Line: " . json_encode($macd['signal_line']) . "<br>";
 echo "Histogram: " . json_encode($macd['histogram']) . "<br>";
 
+// Calcule as Bandas de Bollinger
+$period = 20;
+$num_standard_deviations = 2;
+$bollinger_bands = bollinger_bands($data, $period, $num_standard_deviations);
 
-//$bollinger = bollinger_bands($data, 20);
+// Acesse as bandas superior, média e inferior
+$upper_band = $bollinger_bands['upper'];
+$middle_band = $bollinger_bands['middle'];
+$lower_band = $bollinger_bands['lower'];
+
+
+
 //$macd = moving_average_convergence_divergence($data);
 //$stoch = stochastic_oscillator($data);
 //$rsi = relative_strength_index($data, 14);
 
 echo '<pre>';
-print_r($sma);
-print_r($ema);
-//print_r($bollinger);
+//print_r($sma);
+//print_r($ema);
+print_r($bollinger_bands);
 //print_r($macd);
 //print_r($stoch);
 //print_r($rsi);
 echo '</pre>';
 
+/*
 // Verificar sinais de compra e venda
 for ($i = max(50, 200, 14, 20); $i < count($data['prices']); $i++) {
     $price = $data['prices'][$i][1];
@@ -111,5 +124,5 @@ for ($i = max(50, 200, 14, 20); $i < count($data['prices']); $i++) {
 
     // Implemente as regras de saída de acordo com sua tolerância ao risco e objetivos de lucro
 }
-
+*/
 ?>

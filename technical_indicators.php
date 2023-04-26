@@ -25,7 +25,7 @@ function exponential_moving_average($data, $period) {
 }
 
 // Calcula as Bandas de Bollinger, que são baseadas na SMA e no desvio padrão dos dados
-function bollinger_bands($data, $period, $multiplier) {
+function bollinger_bands($data, $period = 20, $multiplier = 2) {
     $sma = simple_moving_average($data, $period);
     $bbands = [];
     for ($i = 0; $i < count($data) - $period + 1; $i++) {
@@ -77,19 +77,29 @@ function relative_strength_index($data, $period) {
 }
 
 // Calcula a Convergência e Divergência de Médias Móveis (MACD), que é a diferença entre a EMA de curto prazo e a EMA de longo prazo
-function moving_average_convergence_divergence($data, $short_period, $long_period, $signal_period) {
-    $short_ema = exponential_moving_average($data, $short_period);
-    $long_ema = exponential_moving_average($data, $long_period);
-
+function moving_average_convergence_divergence($data, $short_period = 12, $long_period = 26, $signal_period = 9) {
     $macd = [];
-    for ($i = 0; $i < count($short_ema); $i++) {
-        $macd[] = $short_ema[$i] - $long_ema[$i];
+    $signal_line = [];
+    $histogram = [];
+
+    $ema_short = exponential_moving_average($data, $short_period);
+    $ema_long = exponential_moving_average($data, $long_period);
+
+    for ($i = 0; $i < count($data); $i++) {
+        // Verifique se o índice existe antes de acessar
+        if (isset($ema_short[$i]) && isset($ema_long[$i])) {
+            $macd[$i] = $ema_short[$i] - $ema_long[$i];
+        }
     }
 
-    $signal_line = exponential_moving_average($macd, $signal_period);
-    $histogram = [];
-    for ($i = 0; $i < count($macd); $i++) {
-        $histogram[] = $macd[$i] - $signal_line[$i];
+    $ema_signal = exponential_moving_average($macd, $signal_period);
+
+    for ($i = 0; $i < count($data); $i++) {
+        // Verifique se o índice existe antes de acessar
+        if (isset($macd[$i]) && isset($ema_signal[$i])) {
+            $signal_line[$i] = $ema_signal[$i];
+            $histogram[$i] = $macd[$i] - $signal_line[$i];
+        }
     }
 
     return [
@@ -98,6 +108,7 @@ function moving_average_convergence_divergence($data, $short_period, $long_perio
         'histogram' => $histogram,
     ];
 }
+
 
 /*
 // Média Móvel Exponencial (EMA)
