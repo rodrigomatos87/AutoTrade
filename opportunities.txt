@@ -1,1 +1,14 @@
-Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-26 01:57:49 | Price: 28269.25000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-05 11:57:59 | Price: 28130.15000000
+Symbol: BTCUSDT | Interval: 1m | Signal: CALL | Time: 2023-04-05 18:08:59 | Price: 28149.82000000
+Symbol: BTCUSDT | Interval: 1m | Signal: CALL | Time: 2023-04-13 14:04:59 | Price: 30287.71000000
+Symbol: BTCUSDT | Interval: 1m | Signal: CALL | Time: 2023-04-15 12:10:59 | Price: 30391.30000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-16 14:30:59 | Price: 30334.16000000
+Symbol: BTCUSDT | Interval: 1m | Signal: CALL | Time: 2023-04-16 15:16:59 | Price: 30312.16000000
+Symbol: BTCUSDT | Interval: 1m | Signal: CALL | Time: 2023-04-16 16:16:59 | Price: 30470.92000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-17 11:32:59 | Price: 29471.77000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-19 20:17:59 | Price: 28926.81000000
+Symbol: BTCUSDT | Interval: 1m | Signal: CALL | Time: 2023-04-19 22:28:59 | Price: 28862.14000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-20 22:00:59 | Price: 28319.64000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-21 04:16:59 | Price: 28001.11000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-22 12:34:59 | Price: 27509.51000000
+Symbol: BTCUSDT | Interval: 1m | Signal: PUT | Time: 2023-04-25 19:15:59 | Price: 28269.25000000

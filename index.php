@@ -8,7 +8,7 @@ require_once 'technical_indicators.php';
 
 $symbol = "BTCUSDT";
 $interval = "1m";
-$candles_count = 5000;
+$candles_count = 30000;
 
 $current_time = time();
 $current_hour = intval(date('H', $current_time));
@@ -91,19 +91,18 @@ for ($i = max(200, 14); $i < $last_index; $i++) {
 
     if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
         // Sinal de compra (CALL)
-        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i][4]);
+        save_opportunity_to_file($symbol, $interval, "CALL", $data[$i][4], $data[$i][6]);
     } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
         // Sinal de venda (PUT)
-        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4]);
+        save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4], $data[$i][6]);
     } else {
         //echo "$symbol, $interval, \"teste\", {$data[$i][4]}<br>";
     }
 }
 
-function save_opportunity_to_file($symbol, $interval, $signal_type, $candle_data) {
+function save_opportunity_to_file($symbol, $interval, $signal_type, $candle_price, $candle_date) {
     $filename = "opportunities.txt";
-    $opportunity = "Symbol: {$symbol} | Interval: {$interval} | Signal: {$signal_type} | Time: " . date("Y-m-d H:i:s") . " | Price: {$candle_data}" . PHP_EOL;
-
+    $opportunity = "Symbol: {$symbol} | Interval: {$interval} | Signal: {$signal_type} | Time: " . date("Y-m-d H:i:s", $candle_date / 1000) . " | Price: {$candle_price}" . PHP_EOL;
     file_put_contents($filename, $opportunity, FILE_APPEND);
 }
 
