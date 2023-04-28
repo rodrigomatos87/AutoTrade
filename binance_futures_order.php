@@ -89,26 +89,6 @@ function executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, $side, $positi
     ];
 }
 
-$apiKey = 'YOUR_API_KEY';
-$secretKey = 'YOUR_SECRET_KEY';
-
-$symbol = 'BTCUSDT';
-$side = 'BUY';
-$positionSide = 'LONG';
-
-$leverage = 20;                 // Alavancagem
-$stopLossPercentage = 0.005;    // Aceitamos 0,5% de prejuízo, para deixar em 1% utilize '0.01'
-$takeProfitPercentage = 0.2;    // Objetivo de 20% de lucro
-
-$result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, $side, $positionSide, $leverage, $stopLossPercentage, $takeProfitPercentage);
-
-echo "Ordem de mercado executada e protegida com stop-loss e take-profit.<br>";
-echo "Detalhes da ordem:<br>";
-echo "Ordem: " . json_encode($result['order']) . "<br>";
-echo "Stop-Loss: " . json_encode($result['stopLossOrder']) . "<br>";
-echo "Take-Profit: " . json_encode($result['takeProfitOrder']) . "<br>";
-
-
 /*
 A variável $side e $positionSide são usadas para especificar o tipo de ordem e a direção da posição 
 na Binance Futures. Aqui estão as opções disponíveis para cada variável:

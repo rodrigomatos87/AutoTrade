@@ -7,9 +7,16 @@ require_once 'get_crypto_data.php';
 require_once 'technical_indicators.php';
 require_once 'funcoes.php';
 
+$apiKey = 'YOUR_API_KEY';
+$secretKey = 'YOUR_SECRET_KEY';
+
 $symbol = "BTCUSDT";
 $interval = "1m";
 $candles_count = 30000;
+
+$leverage = 20;                 // Alavancagem
+$stopLossPercentage = 0.005;    // Aceitamos 0,5% de prejuízo, para deixar em 1% utilize '0.01'
+$takeProfitPercentage = 0.2;    // Objetivo de 20% de lucro
 
 $current_time = time();
 $current_hour = intval(date('H', $current_time));
@@ -86,6 +93,8 @@ $max_size = min(
     count($stochastic)
 );
 
+$result = '';
+
 for ($i = $max_size - 1; $i >= $highest_min_index; $i--) {
     $is_up_trend = $ema_50[$i] > $ema_200[$i];
     $is_down_trend = $ema_50[$i] < $ema_200[$i];
@@ -101,10 +110,20 @@ for ($i = $max_size - 1; $i >= $highest_min_index; $i--) {
     if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
         // Sinal de compra (CALL)
         save_opportunity_to_file($symbol, $interval, "CALL", $data[$i][4], $data[$i][0]);
+        // $result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, 'BUY', 'LONG', $leverage, $stopLossPercentage, $takeProfitPercentage);
     } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
         // Sinal de venda (PUT)
         save_opportunity_to_file($symbol, $interval, "PUT", $data[$i][4], $data[$i][0]);
+        // $result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, 'SELL', 'SHORT', $leverage, $stopLossPercentage, $takeProfitPercentage);
     }
+}
+
+if($result) { 
+    echo "Ordem de mercado executada e protegida com stop-loss e take-profit.<br>";
+    echo "Detalhes da ordem:<br>";
+    echo "Ordem: " . json_encode($result['order']) . "<br>";
+    echo "Stop-Loss: " . json_encode($result['stopLossOrder']) . "<br>";
+    echo "Take-Profit: " . json_encode($result['takeProfitOrder']) . "<br>";
 }
 
 ?>
