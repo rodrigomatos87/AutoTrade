@@ -1,4 +1,4 @@
-# crypto-signals
+# AutoTrade
 
 Dividimos a estratégia em 4 etapas:
 
