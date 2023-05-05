@@ -79,14 +79,7 @@ $macd = moving_average_convergence_divergence($data, 12, 26, 9);    // (data, sh
 $bollinger_bands = bollinger_bands($data, 20, 2);                   // (data, period, num_standard_deviations)
 $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_period, d_period)
 
-function is_process_running($pid) {
-    return file_exists("/proc/$pid");
-}
-
-if (!file_exists($pidfile) || !is_process_running(file_get_contents($pidfile))) {
-    $node_command = "node binance_websocket.js {$symbol} {$outputfile}";
-    exec(sprintf('%s > %s 2>&1 & echo $! >> %s', $node_command, $outputfile, $pidfile));
-}
+create_process_file($symbol, $outputfile);
 
 $current_time = time();
 $next_update_time = $current_time + $interval_mapping[$interval];

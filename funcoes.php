@@ -14,6 +14,21 @@ function get_realtime_data($outputFile) {
     return null;
 }
 
+function create_process_file($symbol, $outputfile) {
+    // Verifique se o diretório 'processos' existe e, caso contrário, crie-o
+    if (!file_exists('processos')) {
+        mkdir('processos', 0777, true);
+    }
+
+    $process_data = [
+        'symbol' => $symbol,
+        'outputfile' => $outputfile
+    ];
+    $process_file = fopen("processos/{$symbol}.json", 'w');
+    fwrite($process_file, json_encode($process_data));
+    fclose($process_file);
+}
+
 function timestamp_to_readable_date($timestamp) {
     // Se o timestamp estiver em milissegundos, converta-o para segundos
     if (mb_strlen($timestamp) == 13) {
