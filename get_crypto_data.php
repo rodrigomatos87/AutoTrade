@@ -90,6 +90,7 @@ function download_and_extract_data($symbol, $interval, $candles_count) {
             }
         } else {
             echo "Não foi possível extrair o arquivo {$zip_filename}.<br>";
+            unlink("{$data_folder}/{$zip_filename}");
         }
 
         $current_date = date("Y-m-d", strtotime($current_date . " +1 day"));

@@ -18,6 +18,9 @@ $leverage = 20;                 // Alavancagem
 $stopLossPercentage = 0.005;    // Aceitamos 0,5% de prejuízo, para deixar em 1% utilize '0.01'
 $takeProfitPercentage = 0.2;    // Objetivo de 20% de lucro
 
+$pidfile = "pidfile_{$symbol}_{$interval}.txt";
+$outputfile = "node_output_{$symbol}_{$interval}.log";
+
 $current_time = time();
 $current_hour = intval(date('H', $current_time));
 $current_minute = intval(date('i', $current_time));
@@ -74,6 +77,68 @@ $macd = moving_average_convergence_divergence($data, 12, 26, 9);    // (data, sh
 $bollinger_bands = bollinger_bands($data, 20, 2);                   // (data, period, num_standard_deviations)
 $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_period, d_period)
 
+function is_process_running($pid) {
+    return file_exists("/proc/$pid");
+}
+
+if (!file_exists($pidfile) || !is_process_running(file_get_contents($pidfile))) {
+    $node_command = "node binance_websocket.js {$symbol} {$outputfile}";
+    exec(sprintf('%s > %s 2>&1 & echo $! >> %s', $node_command, $outputfile, $pidfile));
+}
+
+while (true) {
+    $current_time = time();
+    
+    if ($current_time >= $next_update_time) {
+        $next_update_time += $interval_mapping[$interval];
+        
+        // Atualize os dados históricos
+        $latest_data = get_latest_data($symbol, $interval, $candles_today);
+        $all_data = array_merge($historical_data, $latest_data);
+        $data = array_slice($all_data, -$candles_count);
+
+        // Recalcule os indicadores
+        $ema_50 = exponential_moving_average($data, 50);
+        $ema_200 = exponential_moving_average($data, 200);
+        $rsi = relative_strength_index($data, 14);
+        $macd = moving_average_convergence_divergence($data, 12, 26, 9);
+        $bollinger_bands = bollinger_bands($data, 20, 2);
+        $stochastic = stochastic_oscillator($data, 14, 3);
+    }
+
+    $realtime_data = get_realtime_data($outputfile);
+    if ($realtime_data !== null) {
+        // Verifique as oportunidades de compra e venda com base nos indicadores atualizados
+        $i = count($data) - 1;
+
+        $is_up_trend = $ema_50[$i] > $ema_200[$i];
+        $is_down_trend = $ema_50[$i] < $ema_200[$i];
+        $rsi_above_50 = $rsi[$i] > 50;
+        $rsi_below_50 = $rsi[$i] < 50;
+        $macd_cross_above_signal = $macd['macd'][$i] > $macd['signal'][$i] && $macd['macd'][$i - 1] <= $macd['signal'][$i - 1];
+        $macd_cross_below_signal = $macd['macd'][$i] < $macd['signal'][$i] && $macd['macd'][$i - 1] >= $macd['signal'][$i - 1];
+        $price_near_lower_band = $realtime_data['c'] <= $bollinger_bands[$i]['lower'];
+        $price_near_upper_band = $realtime_data['c'] >= $bollinger_bands[$i]['upper'];
+        $stoch_k_cross_above_d = $stochastic[$i]['k'] > $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] <= $stochastic[$i - 1]['d'];
+        $stoch_k_cross_below_d = $stochastic[$i]['k'] < $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] >= $stochastic[$i - 1]['d'];
+
+        if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
+            // Sinal de compra (CALL)
+            save_opportunity_to_file($symbol, $interval, "CALL", $realtime_data['c'], $realtime_data['E']);
+            // $result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, 'BUY', 'LONG', $leverage, $stopLossPercentage, $takeProfitPercentage);
+        } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
+            // Sinal de venda (PUT)
+            save_opportunity_to_file($symbol, $interval, "PUT", $realtime_data['c'], $realtime_data['E']);
+            // $result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, 'SELL', 'SHORT', $leverage, $stopLossPercentage, $takeProfitPercentage);
+        }
+    }
+
+    // Adicione um pequeno atraso para evitar sobrecarregar o servidor
+    usleep(1000000); // 1 segundo
+}
+
+
+/*
 // Calculando o maior valor mínimo para configurar o 'for'
 $ema_50_min_index = 50 - 1; // 49
 $ema_200_min_index = 200 - 1; // 199
@@ -125,5 +190,6 @@ if($result) {
     echo "Stop-Loss: " . json_encode($result['stopLossOrder']) . "<br>";
     echo "Take-Profit: " . json_encode($result['takeProfitOrder']) . "<br>";
 }
+*/
 
 ?>

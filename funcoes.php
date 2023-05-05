@@ -1,5 +1,19 @@
 <?php
 
+function get_realtime_data($outputFile) {
+    if (file_exists($outputFile)) {
+        $current_time = time();
+        $file_modified_time = filemtime($outputFile);
+
+        if ($current_time === $file_modified_time) {
+            $json_data = file_get_contents($outputFile);
+            $data = json_decode($json_data, true);
+            return $data;
+        }
+    }
+    return null;
+}
+
 function timestamp_to_readable_date($timestamp) {
     // Se o timestamp estiver em milissegundos, converta-o para segundos
     if (mb_strlen($timestamp) == 13) {
