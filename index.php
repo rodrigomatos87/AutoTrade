@@ -14,9 +14,10 @@ $symbol = "BTCUSDT";
 $interval = "1m";
 $candles_count = 30000;
 
-$leverage = 20;                 // Alavancagem
-$stopLossPercentage = 0.005;    // Aceitamos 0,5% de prejuízo, para deixar em 1% utilize '0.01'
-$takeProfitPercentage = 0.2;    // Objetivo de 20% de lucro
+$leverage = 20;                              // Alavancagem
+$stopLossPercentage = 0.005;                 // Aceitamos 0,5% de prejuízo, para deixar em 1% utilize '0.01'
+$takeProfitPercentage = 0.2;                 // Objetivo de 20% de lucro
+$min_time_between_opportunities = 1800;      // Não pegar mais de uma oportunidade no intervalo de (Em segundos)
 
 $pidfile = "pidfile_{$symbol}_{$interval}.txt";
 $outputfile = "node_output_{$symbol}_{$interval}.log";
@@ -86,6 +87,12 @@ if (!file_exists($pidfile) || !is_process_running(file_get_contents($pidfile))) 
     exec(sprintf('%s > %s 2>&1 & echo $! >> %s', $node_command, $outputfile, $pidfile));
 }
 
+$current_time = time();
+$next_update_time = $current_time + $interval_mapping[$interval];
+
+$last_buy_opportunity_time = 0;
+$last_sell_opportunity_time = 0;
+
 while (true) {
     $current_time = time();
     
@@ -122,12 +129,14 @@ while (true) {
         $stoch_k_cross_above_d = $stochastic[$i]['k'] > $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] <= $stochastic[$i - 1]['d'];
         $stoch_k_cross_below_d = $stochastic[$i]['k'] < $stochastic[$i]['d'] && $stochastic[$i - 1]['k'] >= $stochastic[$i - 1]['d'];
 
-        if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d) {
+        if ($is_up_trend && $rsi_above_50 && $macd_cross_above_signal && $price_near_lower_band && $stoch_k_cross_above_d && ($current_time - $last_buy_opportunity_time) >= $min_time_between_opportunities) {
             // Sinal de compra (CALL)
+            $last_buy_opportunity_time = $current_time;
             save_opportunity_to_file($symbol, $interval, "CALL", $realtime_data['c'], $realtime_data['E']);
             // $result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, 'BUY', 'LONG', $leverage, $stopLossPercentage, $takeProfitPercentage);
-        } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d) {
+        } elseif ($is_down_trend && $rsi_below_50 && $macd_cross_below_signal && $price_near_upper_band && $stoch_k_cross_below_d && ($current_time - $last_sell_opportunity_time) >= $min_time_between_opportunities) {
             // Sinal de venda (PUT)
+            $last_sell_opportunity_time = $current_time;
             save_opportunity_to_file($symbol, $interval, "PUT", $realtime_data['c'], $realtime_data['E']);
             // $result = executeBinanceFuturesOrder($apiKey, $secretKey, $symbol, 'SELL', 'SHORT', $leverage, $stopLossPercentage, $takeProfitPercentage);
         }
