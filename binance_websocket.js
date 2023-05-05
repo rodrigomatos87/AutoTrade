@@ -45,7 +45,7 @@ function checkProcesses() {
           fs.readFileSync(path.join(processesDir, file), "utf8")
         );
         const symbol = processInfo.symbol;
-        const outputfile = processInfo.outputfile;
+        const outputfile = path.join("data_realtime", processInfo.outputfile);
 
         if (!sockets[symbol]) {
           startWebSocket(symbol, outputfile);

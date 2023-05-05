@@ -1,12 +1,15 @@
 <?php
 
 function get_realtime_data($outputFile) {
-    if (file_exists($outputFile)) {
+    $dataRealtimeDir = "data_realtime";
+    $outputFilePath = $dataRealtimeDir . DIRECTORY_SEPARATOR . $outputFile;
+
+    if (file_exists($outputFilePath)) {
         $current_time = time();
-        $file_modified_time = filemtime($outputFile);
+        $file_modified_time = filemtime($outputFilePath);
 
         if ($current_time === $file_modified_time) {
-            $json_data = file_get_contents($outputFile);
+            $json_data = file_get_contents($outputFilePath);
             $data = json_decode($json_data, true);
             return $data;
         }
@@ -15,10 +18,8 @@ function get_realtime_data($outputFile) {
 }
 
 function create_process_file($symbol, $outputfile) {
-    // Verifique se o diretório 'processos' existe e, caso contrário, crie-o
-    if (!file_exists('processos')) {
-        mkdir('processos', 0777, true);
-    }
+    if (!file_exists('processos')) { mkdir('processos', 0777, true); }
+    if (!file_exists('data_realtime')) { mkdir('data_realtime', 0777, true); }
 
     $process_data = [
         'symbol' => $symbol,
