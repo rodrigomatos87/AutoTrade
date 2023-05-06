@@ -17,15 +17,16 @@ function get_realtime_data($outputFile) {
     return null;
 }
 
-function create_process_file($symbol, $outputfile) {
-    if (!file_exists('processos')) { mkdir('processos', 0777, true); }
+function create_process_file($symbol, $interval) {
+    if (!file_exists('process')) { mkdir('process', 0777, true); }
     if (!file_exists('data_realtime')) { mkdir('data_realtime', 0777, true); }
+    $outputfile = "node_output_{$symbol}_{$interval}.log";
 
     $process_data = [
         'symbol' => $symbol,
         'outputfile' => $outputfile
     ];
-    $process_file = fopen("processos/{$symbol}.json", 'w');
+    $process_file = fopen("process/{$symbol}_{$interval}.json", 'w');
     fwrite($process_file, json_encode($process_data));
     fclose($process_file);
 }

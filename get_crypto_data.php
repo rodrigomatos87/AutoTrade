@@ -46,7 +46,8 @@ function download_and_extract_data($symbol, $interval, $candles_count) {
 
     $current_date = $start_date;
 
-    $data_folder = 'data';
+    $data_folder = 'data_historical';
+    if (!file_exists($data_folder)) { mkdir($data_folder, 0777, true); }
 
     // Verifique se a pasta 'data' existe, caso contrário, crie-a
     if (!file_exists($data_folder)) {

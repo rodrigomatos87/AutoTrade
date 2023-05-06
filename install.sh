@@ -1,8 +1,9 @@
 #!/bin/bash
 
 cd /var/www/html
-mkdir processos
+mkdir process
 mkdir data_realtime
+mkdir data_historical
 
 npm install
 npm install wc@latest

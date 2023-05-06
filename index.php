@@ -22,7 +22,19 @@ $args[] = 'tp=' . $takeProfitPercentage;
 $args[] = 't=' . $min_time_between_opportunities;
 
 $command = 'php -f start.php ' . implode(' ', $args);
-exec(sprintf('nohup %s > /dev/null 2>&1 &', $command));
-echo sprintf('nohup %s > /dev/null 2>&1 &', $command);
+
+$pidexec = exec("ps aux | grep '{$command}' | grep -v grep | awk '{print $2}'");
+if(!$pidexec) { 
+    exec(sprintf('nohup %s > /dev/null 2>&1 &', $command));
+    sleep(4);
+    $pidexec = exec("ps aux | grep '{$command}' | grep -v grep | awk '{print $2}'");
+    if(!$pidexec) {
+        echo "Processo executado com sucesso! PID: {$pidexec}\n";
+    } else {
+        echo "Não foi possível executar o processo!\n";
+    }
+}else { 
+    echo "Processo está em execução! PID: {$pidexec}\n";
+}
 
 ?>

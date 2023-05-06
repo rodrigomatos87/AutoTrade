@@ -20,7 +20,6 @@ require_once 'funcoes.php';
 $apiKey = 'YOUR_API_KEY';
 $secretKey = 'YOUR_SECRET_KEY';
 
-$pidfile = "pidfile_{$symbol}_{$interval}.txt";
 $outputfile = "node_output_{$symbol}_{$interval}.log";
 
 $current_time = time();
@@ -79,7 +78,7 @@ $macd = moving_average_convergence_divergence($data, 12, 26, 9);    // (data, sh
 $bollinger_bands = bollinger_bands($data, 20, 2);                   // (data, period, num_standard_deviations)
 $stochastic = stochastic_oscillator($data, 14, 3);                  // (data, k_period, d_period)
 
-create_process_file($symbol, $outputfile);
+create_process_file($symbol, $interval);
 
 $current_time = time();
 $next_update_time = $current_time + $interval_mapping[$interval];
