@@ -41,9 +41,6 @@ curl_close($curl);
   <title>Página Inicial</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
-
   <style>
     body {
       background-color: #f8f9fa;
@@ -105,63 +102,44 @@ curl_close($curl);
 
   <br><br><br>
 
-  <div class="row">
-  <div class="col-md-6">
-    <div id="fearAndGreedChart" style="width: 400px; height: 200px;"></div>
-    <p class="text-center">Índice de Medo e Ganância</p>
-  </div>
-  <div class="col-md-6">
-    <div class="legend">
-      <p><span style="color: #d9534f">■</span> 0-25: Medo Extremo</p>
-      <p><span style="color: #f0ad4e">■</span> 26-50: Medo</p>
-      <p><span style="color: #5cb85c">■</span> 51-75: Ganância</p>
-      <p><span style="color: #337ab7">■</span> 76-100: Ganância Extrema</p>
-    </div>
-  </div>
-</div>
-
-
-</div>
-
+  <div id="gauge-chart" style="width:400px; height:160px"></div>
+<div id="info-chart" style="width:400px; height:140px; font-family: Arial; font-size: 14px"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  var fearAndGreedIndex = <?php echo $fear_and_greed_index ? $fear_and_greed_index : 0; ?>;
-
+  // Cria o gráfico usando a biblioteca JustGage
   var g = new JustGage({
-    id: "fearAndGreedChart",
-    value: fearAndGreedIndex,
+    id: 'gauge-chart',
+    value: <?=$fear_and_greed_index;?>, // Usa o valor atual do índice
     min: 0,
     max: 100,
-    title: "Índice de Medo e Ganância",
-    label: "",
-    customSectors: [
-    {
-        color: "#d9534f",
-        lo: 75,
-        hi: 100
-    },
-    {
-        color: "#f0ad4e",
-        lo: 50,
-        hi: 75
-    },
-    {
-        color: "#5cb85c",
-        lo: 25,
-        hi: 50
-    },
-    {
-        color: "#337ab7",
-        lo: 0,
-        hi: 25
+    title: 'Índice de Medo e Ganância',
+    label: 'Pontos',
+    levelColors: ['#d9534f', '#f0ad4e', '#ffff00', '#5cb85c', '#337ab7'], // Usa as cores do site da CNN
+    levelColorsGradient: false,
+    pointer: true, // Usa um ponteiro para indicar o valor
+    pointerOptions: {
+      toplength: -15,
+      bottomlength: 10,
+      bottomwidth: 12,
+      color: '#8e8e93',
+      stroke: '#ffffff',
+      stroke_width: 3,
+      stroke_linecap: 'round'
     }
-    ],
-    counter: true,
-    relativeGaugeSize: true
   });
-});
 
+  // Cria a div com as informações do gráfico
+  var info = document.getElementById('info-chart');
+  info.innerHTML = `
+    <p>Fechamento anterior <span style="float:right">52</span></p>
+    <p>1 semana atrás <span style="float:right">52</span></p>
+    <p>1 mês atrás <span style="float:right">55</span></p>
+    <p>1 ano atrás <span style="float:right">30</span></p>
+  `;
 </script>
+
+</div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
