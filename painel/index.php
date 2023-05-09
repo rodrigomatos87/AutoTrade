@@ -1,5 +1,10 @@
 <?php
+ini_set('display_errors',1);
+ini_set('display_startup_erros',1);
+error_reporting(E_ALL);
+
 session_start();
+require_once 'conexao.php';
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name'])) {
@@ -7,6 +12,28 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name'])) {
   header("Location: login.php");
   exit;
 }
+
+$sql = "SELECT apiKey, secretKey FROM users WHERE id = " . $_SESSION['user_id'];
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
+$apiKey = $row['apiKey'];
+$secretKey = $row['secretKey'];
+
+require '../vendor/autoload.php';
+
+use Binance\API;
+use Binance\API\Futures;
+
+// Buscar saldo spot
+$binance = new API($apiKey, $secretKey);
+$spot_balance = $binance->account();
+
+// Buscar saldo futuros
+$binanceFutures = new Futures($apiKey, $secretKey);
+$binanceFutures->useServerTime();
+$futures_balance = $binanceFutures->account();
+
+
 
 $url = "https://api.alternative.me/fng/?limit=1";
 
@@ -98,6 +125,16 @@ curl_close($curl);
     <div class="logout" onclick="location.href='logout.php';">
       Sair
     </div>
+  </div>
+
+  <div>
+  <h3>Saldo Spot</h3>
+  <pre><?php print_r($spot_balance); ?></pre>
+  </div>
+
+  <div>
+    <h3>Saldo Futuros</h3>
+    <pre><?php print_r($futures_balance); ?></pre>
   </div>
 
   <br><br><br>
